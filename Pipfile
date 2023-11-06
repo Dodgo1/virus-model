@@ -10,6 +10,7 @@ mesa = "*"
 solara = "*"
 jupyterlab = "*"
 notebook = "*"
+mesa-viz-tornado = {ref = "b4e9cae550a6ef1580dd906a5f9a1b8c51726aa8", git = "git+https://github.com/projectmesa/mesa-viz-tornado.git"}
 
 [dev-packages]
 
