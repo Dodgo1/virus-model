@@ -2,8 +2,34 @@
 Please use pipenv, one of the dependencies used in web visualization recently had a bad release (mesa-viz-tornado).
 Appropriate version is referenced by ref and git link is provided in Pipfile.
 
-The issue is being taken care of by the maintainers
+The issue is being taken care of by the maintainer
 
+`pipenv install` - create venv and install dependencies
+
+`pipenv shell` - use venv
+
+or use
+
+`pipenv run <command>`
+
+## Running visualizations
+### web visualization
+` python visualization_web.py ` - will output a link to a localhost website
+
+variables can bez easily changed using various inputs on the left of the webpage.
+
+**Apply them by clicking "Reset" in top nav menu.**
+
+Start button - runs the model.
+Stop button - stops the model.
+Slider at the top of the grid allows for changing framerate
+
+
+### matplotlib visualization
+` python matplotlib_visualization.py` - will run the provided demo using matplotlib animations
+
+
+variables can be edited by changing values in `matplolib_visualization.py`
 
 ### variables:
 
