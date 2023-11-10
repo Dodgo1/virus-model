@@ -1,8 +1,10 @@
 import mesa
 import main
 
-COLORS = ["#3b0e5c", "red", "pink", "green", "#c4c03b", "#c4423b"]
+COLORS = ["grey", "red", "pink", "green", "#c4c03b", "#c4423b"]
 DATACOLLECTOR = "datacollector"
+
+
 def agent_portrayal(agent: main.CovidAgent):
     style = {
         "Shape": "circle",
@@ -11,8 +13,8 @@ def agent_portrayal(agent: main.CovidAgent):
         "Filled": "true",
         "Layer": 0,
         "r": 1,
-        "id":agent.id,
-        "health_status":agent.health_status
+        "id": agent.id,
+        "health_status": agent.health_status
 
     }
     if agent.health_status == main.HEALTH_STATUSES[2]:
@@ -26,6 +28,7 @@ def agent_portrayal(agent: main.CovidAgent):
         return style
     style["Color"] = COLORS[0]
     return style
+
 
 model_params = {
     "map_size": (100, 100),
@@ -88,22 +91,22 @@ model_params = {
 grid = mesa.visualization.CanvasGrid(agent_portrayal, *model_params["map_size"], 1000, 1000)
 chart1 = mesa.visualization.ChartModule(
     [{
-            "Label": "population",
-            "Color": "Red",
-            "label": "population",
-            "borderColor": "rgb(75, 192, 0)"
-        },{
-            "Label": "deaths_count",
-            "Color": "Red",
-            "label": "deaths_count",
-            "borderColor": "#000000"
-        },{
-            "Label": "number_of_sick",
-            "Color": "Red",
-            "label": "number_of_sick",
-            "borderColor": "#ff0000"
-        }
-        ],
+        "Label": "population",
+        "Color": "Red",
+        "label": "population",
+        "borderColor": "rgb(75, 192, 0)"
+    }, {
+        "Label": "deaths_count",
+        "Color": "Red",
+        "label": "deaths_count",
+        "borderColor": "#000000"
+    }, {
+        "Label": "number_of_sick",
+        "Color": "Red",
+        "label": "number_of_sick",
+        "borderColor": "#ff0000"
+    }
+    ],
     data_collector_name=DATACOLLECTOR
 )
 chart2 = mesa.visualization.ChartModule(
@@ -121,7 +124,7 @@ chart3 = mesa.visualization.ChartModule(
         "Color": "Red",
         "label": "average_number_of_infected_by_ill",
         "borderColor": "#00ff00"
-    },{
+    }, {
         "Label": "estimated_average_number_of_infected",
         "Color": "Red",
         "label": "estimated_average_number_of_infected",
@@ -140,7 +143,7 @@ chart4 = mesa.visualization.ChartModule(
 )
 
 server = mesa.visualization.ModularServer(
-    main.CovidModel, [grid, chart1,chart2,chart3,chart4], "Covid Model", model_params=model_params
+    main.CovidModel, [grid, chart1, chart2, chart3, chart4], "Covid Model", model_params=model_params
 )
 
 server.port = 8080

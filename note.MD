@@ -1,4 +1,11 @@
-# variables:
+# RUNNING THE MODEL
+Please use pipenv, one of the dependencies used in web visualization recently had a bad release (mesa-viz-tornado).
+Appropriate version is referenced by ref and git link is provided in Pipfile.
+
+The issue is being taken care of by the maintainers
+
+
+### variables:
 
 - V - distance agent can move ( can be different for each)
 - d - distance below which agent can contract illness 
@@ -21,12 +28,12 @@ possible health states of agent:
 - [x] active cases
 - [x] deaths
 - [x] average density
-- [x] ? number R<sub>0</sub> (reproduction number)
+- [x] number R<sub>0</sub> (reproduction number)
 
 ### ideas
 - implement social distancing (possibility of contraction would have to depend on distance?)
 - implement walls/barriers
-- number of vaccinated as percentage
+- input of vaccinated agents as percentage
 - different contraction_probability for each agent
 - different death_probability for each agent
 - no immunity

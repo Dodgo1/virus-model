@@ -14,5 +14,4 @@ a = CovidModel(
 )
 
 a.display_map_plot()
-for i in range(1000):
-    a.step()
+
