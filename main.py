@@ -1,8 +1,8 @@
 import random
+import matplotlib.pyplot as plt
 import mesa
-import numpy
 import numpy as np
-import matplotlib as mp
+from matplotlib.animation import FuncAnimation
 
 HEALTH_STATUSES = ["healthy", "developing", "ill", "immune", "dead"]
 
@@ -36,10 +36,11 @@ class CovidModel(mesa.Model):
         return sum(distances) / len(distances)
 
     def get_average_number_of_infected(self):
-        infected_counters = [agent.infected_counter for agent in self.schedule.agents if agent.health_status == HEALTH_STATUSES[2]]
+        infected_counters = [agent.infected_counter for agent in self.schedule.agents if
+                             agent.health_status == HEALTH_STATUSES[2]]
         if len(infected_counters) == 0:
             return 0
-        return sum(infected_counters)/len(infected_counters)
+        return sum(infected_counters) / len(infected_counters)
 
     def get_number_of_infected(self):
         infected_counters = 0
@@ -50,13 +51,14 @@ class CovidModel(mesa.Model):
     def get_number_of_ill(self):
         ill_counter = 0
         for agent in self.schedule.agents:
-            if not agent.health_status in [HEALTH_STATUSES[1],HEALTH_STATUSES[2]]:
+            if agent.health_status not in [HEALTH_STATUSES[1], HEALTH_STATUSES[2]]:
                 continue
             ill_counter += 1
         return ill_counter
 
     def estimate_average_number_of_infected(self):
-        return len(self.grid.get_neighbors(self.get_random_agent().pos,moore=True,include_center=True,radius=self.illness_range)) * self.contracting_probability
+        return len(self.grid.get_neighbors(self.get_random_agent().pos, moore=True, include_center=True,
+                                           radius=self.illness_range)) * self.contracting_probability
 
     def __init__(self,
                  agent_move_distance: int,
@@ -69,8 +71,10 @@ class CovidModel(mesa.Model):
                  agents_count: int,
                  map_size: tuple,
                  map_torus: bool,
+                 number_of_vaccinated:int,
                  ):
         super().__init__()
+        self.img = None
         self.agent_move_distance = agent_move_distance * 2
         self.illness_range = illness_range
         self.contracting_probability = contracting_probability
@@ -83,13 +87,16 @@ class CovidModel(mesa.Model):
         self.schedule = mesa.time.RandomActivation(self)
         self.grid = mesa.space.MultiGrid(*map_size, map_torus)
         self.deaths_counter = 0
-
+        self.map_size = map_size
 
         for index in range(self.agents_count):
+            health_status = HEALTH_STATUSES[0]
+            if index < number_of_vaccinated:
+                health_status = HEALTH_STATUSES[3]
             agent = CovidAgent(
-                id=index,
+                unique_id=index,
                 model=self,
-                health_status="healthy",
+                health_status=health_status,
             )
             self.schedule.add(agent)
             self.grid.place_agent(agent, self.get_random_cell(map_size))
@@ -109,16 +116,34 @@ class CovidModel(mesa.Model):
         self.get_random_agent().get_infected()
 
     def step(self):
-        self.datacollector.collect(self)
         self.schedule.step()
+        self.datacollector.collect(self)
 
+    def get_ndarray(self):
+        arr = np.zeros(shape=self.map_size)
+        for agent in self.schedule.agents:
+            x, y = agent.pos
+            arr[x][y] = HEALTH_STATUSES.index(agent.health_status) + 1
+        return arr
+
+    def display_map_plot(self):
+        fig, ax = plt.subplots()
+        ax.set_yticklabels([])
+        ax.set_xticklabels([])
+        self.img = plt.imshow(self.get_ndarray(), cmap="viridis")
+        _ = FuncAnimation(fig=fig, func=self._frame, frames=10, interval=30)
+        plt.show()
+
+    def _frame(self, _):
+        self.step()
+        return self.img.set(data=self.get_ndarray())
 
 
 class CovidAgent(mesa.Agent):
 
-    def __init__(self, id, model: CovidModel, health_status):
-        super().__init__(id, model)
-        self.id = id
+    def __init__(self, unique_id, model: CovidModel, health_status):
+        super().__init__(unique_id, model)
+        self.id = unique_id
         self.health_status = health_status
         self.incubation_timer = -1  # if -1 means didn't start
         self.recovery_timer = -1  # if -1 means didn't start
@@ -129,14 +154,13 @@ class CovidAgent(mesa.Agent):
         distance = 0
         if self.model.schedule.get_agent_count() == 1:
             return 0
-        while True: #TODO: refactor?
+        while True:  # TODO: refactor?
             neighbors = self.model.grid.get_neighbors(
                 self.pos,
                 moore=True,
                 include_center=True,
                 radius=distance
             )
-            # print(neighbors)
             if len(neighbors) - 1:  # remove self
                 return distance
             distance += 1
@@ -149,7 +173,8 @@ class CovidAgent(mesa.Agent):
         if self.incubation_timer != -1:
             self.incubation_timer -= 1
 
-        if self.incubation_timer == -1 and self.health_status == HEALTH_STATUSES[1]: # end_developing(),start_recovery()
+        if self.incubation_timer == -1 and self.health_status == HEALTH_STATUSES[1]:
+            # end_developing(),start_recovery()
             self.recovery_timer = self.model.recovery_time
             self.health_status = HEALTH_STATUSES[2]
 
@@ -172,6 +197,7 @@ class CovidAgent(mesa.Agent):
             self.infect()
 
     def move(self):
+
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
             moore=self.model.map_torus,
@@ -196,4 +222,3 @@ class CovidAgent(mesa.Agent):
                 if random.random() < self.model.contracting_probability:
                     agent.get_infected()
                     self.infected_counter += 1
-

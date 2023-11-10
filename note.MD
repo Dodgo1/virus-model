@@ -12,7 +12,8 @@ possible health states of agent:
 - healthy
 - developing (incubating)
 - ill
-- immune / dead
+- immune
+- dead
 
 
 ### plots:
@@ -20,5 +21,13 @@ possible health states of agent:
 - [x] active cases
 - [x] deaths
 - [x] average density
-- [x] number R<sub>0</sub> (reproduction number)
-- 
+- [x] ? number R<sub>0</sub> (reproduction number)
+
+### ideas
+- implement social distancing (possibility of contraction would have to depend on distance?)
+- implement walls/barriers
+- number of vaccinated as percentage
+- different contraction_probability for each agent
+- different death_probability for each agent
+- no immunity
+- introduce more variables for R<sub>0</sub>

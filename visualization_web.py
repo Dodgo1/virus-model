@@ -1,8 +1,31 @@
 import mesa
-from mesa.experimental import JupyterViz
 import main
 
-COLORS = ["#3b0e5c", "#20418c", "#dd42f5", "#2bbd68", "#c4c03b", "#c4423b"]
+COLORS = ["#3b0e5c", "red", "pink", "green", "#c4c03b", "#c4423b"]
+DATACOLLECTOR = "datacollector"
+def agent_portrayal(agent: main.CovidAgent):
+    style = {
+        "Shape": "circle",
+        "xAlign": 0.5,
+        "yAlign": 0.5,
+        "Filled": "true",
+        "Layer": 0,
+        "r": 1,
+        "id":agent.id,
+        "health_status":agent.health_status
+
+    }
+    if agent.health_status == main.HEALTH_STATUSES[2]:
+        style["Color"] = COLORS[1]
+        return style
+    if agent.health_status == main.HEALTH_STATUSES[1]:
+        style["Color"] = COLORS[2]
+        return style
+    if agent.health_status == main.HEALTH_STATUSES[3]:
+        style["Color"] = COLORS[3]
+        return style
+    style["Color"] = COLORS[0]
+    return style
 
 model_params = {
     "map_size": (100, 100),
@@ -48,46 +71,19 @@ model_params = {
         max_value=1.,
         step=0.01,
     ),
-    "agents_count": mesa.visualization.Slider(
-        value=2,
+    "number_of_vaccinated": mesa.visualization.NumberInput(
+        value=0,
+        name="number_of_vaccinated",
+    ),
+    "agents_count": mesa.visualization.NumberInput(
+        value=100,
         name="agents_count",
-        min_value=1,
-        max_value=100000,
-        step=1,
     ),
     "map_torus": mesa.visualization.Checkbox(
         name="map_torus",
         value=True
     )
 }
-
-
-def agent_portrayal(agent: main.CovidAgent):
-    style = {
-        "Shape": "circle",
-        "xAlign": 0.5,
-        "yAlign": 0.5,
-        "Filled": "true",
-        "Layer": 0,
-        "r": 1,
-        "id":agent.unique_id,
-        "health_status":agent.health_status
-
-    }
-    if agent.health_status == "ill":
-        style["Color"] = "red"
-        return style
-    if agent.health_status == "developing":
-        style["Color"] = "pink"
-        return style
-    if agent.health_status == "immune":
-        style["Color"] = "green"
-        return style
-    mates = agent.model.grid.get_cell_list_contents([agent.pos])
-    # style["Color"] = COLORS[len(mates) - 1]
-    style["Color"] = COLORS[0]
-    return style
-
 
 grid = mesa.visualization.CanvasGrid(agent_portrayal, *model_params["map_size"], 1000, 1000)
 chart1 = mesa.visualization.ChartModule(
@@ -108,7 +104,7 @@ chart1 = mesa.visualization.ChartModule(
             "borderColor": "#ff0000"
         }
         ],
-    data_collector_name="datacollector"
+    data_collector_name=DATACOLLECTOR
 )
 chart2 = mesa.visualization.ChartModule(
     [{
@@ -117,7 +113,7 @@ chart2 = mesa.visualization.ChartModule(
         "label": "average_distance",
         "borderColor": "#0000ff"
     }],
-    data_collector_name="datacollector"
+    data_collector_name=DATACOLLECTOR
 )
 chart3 = mesa.visualization.ChartModule(
     [{
@@ -131,7 +127,7 @@ chart3 = mesa.visualization.ChartModule(
         "label": "estimated_average_number_of_infected",
         "borderColor": "#055000"
     }],
-    data_collector_name="datacollector"
+    data_collector_name=DATACOLLECTOR
 )
 chart4 = mesa.visualization.ChartModule(
     [{
@@ -140,10 +136,8 @@ chart4 = mesa.visualization.ChartModule(
         "label": "number_of_infected",
         "borderColor": "#000ff0"
     }],
-    data_collector_name="datacollector"
+    data_collector_name=DATACOLLECTOR
 )
-
-
 
 server = mesa.visualization.ModularServer(
     main.CovidModel, [grid, chart1,chart2,chart3,chart4], "Covid Model", model_params=model_params
